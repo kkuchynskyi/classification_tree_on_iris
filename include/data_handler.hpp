@@ -29,6 +29,7 @@ class data_handler{
     std::vector<std::string> get_species(){
         return species_vec;
     }
+    std::vector<std::vector<float>> get_data();
 
 
 
@@ -38,3 +39,12 @@ class data_handler{
 
 
 };
+
+std::vector<std::vector<float>> data_handler::get_data(){
+    std::vector<std::vector<float>> data;
+    data.push_back(this->sepal_length_vec);
+    data.push_back(this->sepal_width_vec);
+    data.push_back(this->petal_length_vec);
+    data.push_back(this->petal_width_vec);
+    return data;
+}
