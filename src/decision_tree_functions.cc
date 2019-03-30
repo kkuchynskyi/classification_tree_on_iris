@@ -50,7 +50,6 @@ std::string classify_data(std::vector<std::string> labels){
 }
 
 std::map<int,std::vector<float>> get_potential_splits(std::vector<std::vector<float>> data,const std::vector<std::string> labels){
-    // std::cout<<"get_potential_splits: "<<'\n';
     std::map<int,std::vector<float>> potential_splits;
     for(auto column_index=0;column_index<data.size();column_index++){
         
@@ -73,7 +72,6 @@ std::map<int,std::vector<float>> get_potential_splits(std::vector<std::vector<fl
 
 std::tuple<std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<std::string>,std::vector<std::string>> \
  split_data(std::vector<std::vector<float>> data,std::vector<std::string> labels,float split_value,int column_index){
-    // std::cout<<"START split data"<<std::endl;
     std::vector<std::vector<float>> data_below;
     std::vector<std::vector<float>> data_above;
     std::vector<std::string> labels_below;
@@ -143,21 +141,16 @@ float calculate_entropy(std::vector<float> feature_column,std::vector<std::strin
     float sum_of_elements = 0;
     std::for_each( unique_counts.begin(), unique_counts.end(), [&](float & x)
     { sum_of_elements-=(x/labels.size())*log2(x/labels.size()); });
-    // std::cout<<"END ENTROPY";
 
     return sum_of_elements;
 }
 
 float calculate_overall_entropy(std::vector<float> data_below,std::vector<float> data_above,std::vector<std::string> labels_below,std::vector<std::string> labels_above){
-    // std::cout<<"start calculate_overall_entropy"<<'\n';
     float probability_below = (float)data_below.size()/(float)(data_below.size() + data_above.size());
     float probability_above = 1 - probability_below;
-    // std::cout<<"data_below.size() : "<<data_below.size()<<std::endl;
-    // std::cout<<"data_above.size() : "<<data_above.size()<<std::endl;
-    // std::cout<<"prob_below:"<<probability_below<<" and prob above:"<<probability_above<<std::endl;
+ 
     float overall_entropy = (probability_above*calculate_entropy(data_above,labels_above) \
     +probability_below*calculate_entropy(data_below,labels_below));
-    // std::cout<<"end calculate_overall_entropy"<<'\n';
     return overall_entropy;
 }
 std::tuple<int,float> determine_best_split(std::vector<std::vector<float>> data,const std::vector<std::string> labels,std::map<int,std::vector<float>> potential_splits){
@@ -165,7 +158,6 @@ std::tuple<int,float> determine_best_split(std::vector<std::vector<float>> data,
     float current_overall_entropy;
     int best_split_column;
     float best_split_value;
-    // std::cout<<std::endl<<"STArt determine best split"<<"\n";
 
     std::tuple<std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<std::string>,std::vector<std::string>> tuple_;
     std::vector<std::vector<float>> data_below;
@@ -173,36 +165,25 @@ std::tuple<int,float> determine_best_split(std::vector<std::vector<float>> data,
     std::vector<std::string> labels_below = std::get<2>(tuple_);
     std::vector<std::string> labels_above = std::get<3>(tuple_);
     for (auto const& x : potential_splits){
-        // std::cout<<x.first<<'\n';
         for(auto j=0;j<x.second.size();j++){
             tuple_  = split_data(data,labels,x.second.at(j),x.first);
             data_below = std::get<0>(tuple_);
             data_above = std::get<1>(tuple_);
             labels_below = std::get<2>(tuple_);
             labels_above = std::get<3>(tuple_);
-            // std::cout<<"START ENTROPY"<<std::endl;
-            // std::cout<<data_below.size()<<" "<<x.first<<" "<<data_above.size();
             if (data_above.size()!=0 && data_below.size()!=0){
                 current_overall_entropy = calculate_overall_entropy(data_below.at(x.first),data_above.at(x.first),labels_below,labels_above);
-            
-
-                
                 if (current_overall_entropy<overall_entropy){
                     overall_entropy=current_overall_entropy;
-                    // std::cout<<"entropy: "<<current_overall_entropy<<' '<<x.first<<' '<<x.second.at(j)<<'\n';
                     best_split_column = x.first;
                     best_split_value = x.second.at(j);
                 }
 
             }
-            // std::cout<<"END ENTROPY"<<std::endl;
-
         }
     }
 
-    // std::cout<<'\n';
-    // std::cout<<"BEST SPLIT COLUMN: "<<best_split_column<<'\n';
-    // std::cout<<"BEST SPLIT VALUE: "<<best_split_value<<'\n';
+
     return std::make_tuple(best_split_column,best_split_value);
 }
 
@@ -215,27 +196,21 @@ void decision_tree_algorithm(std::vector<std::vector<float>> data,std::vector<st
     //recursive part
     else{
         counter+=1;
-        // std::cout<<0;
         std::map<int,std::vector<float>> potential_splits = get_potential_splits(data,labels);
-        // std::cout<<1;
         std::tuple<int,float> tuple_ = determine_best_split(data,labels,potential_splits);
         int column_to_split = std::get<0>(tuple_);
         float split_value = std::get<1>(tuple_);
         std::cout<<std::endl;
         std::cout<<"COUNT:"<<counter<<". Column to split: "<<column_to_split<<". Split value: "<<split_value<<std::endl;
-        // std::cout<<2;
         std::tuple<std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<std::string>,std::vector<std::string>> splitted_data =  split_data(data,labels,split_value,column_to_split);
-        // std::cout<<3;
         std::vector<std::vector<float>> data_below = std::get<0>(splitted_data);
         std::vector<std::vector<float>> data_above = std::get<1>(splitted_data);
         std::vector<std::string> labels_below = std::get<2>(splitted_data);
         std::vector<std::string> labels_above = std::get<3>(splitted_data);
-        // std::cout<<"labels_below,above :"<<labels_below.size()<<" "<<labels_above.size()<<std::endl;
         std::cout<<"Above"<<std::endl;
         decision_tree_algorithm(data_above,labels_above,counter);
         std::cout<<"Below"<<std::endl;
         decision_tree_algorithm(data_below,labels_below,counter);
-        // std::cout<<counter<<" ";
 
 
     }
@@ -247,52 +222,8 @@ int main()
 {   
     //read csv
     ReadCsvIris *iris = new ReadCsvIris(151,"iris/iris.csv");
-    // potential splits
-    // std::map<int,std::vector<float>> splits= get_potential_splits(iris->get_data(),iris->get_species());
-    // std::cout<<"FIRST SPLIT OF 3d column by splitting value 0.8"<<std::endl;
-    // //split feature column by value
-    // float split_value = 0.8;
-    // std::tuple<std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<std::string>,std::vector<std::string>> tuple_ = split_data(iris->get_data(),iris->get_species(),split_value,3);
-    // std::vector<std::vector<float>> data_below = std::get<0>(tuple_);
-    // std::vector<std::vector<float>> data_above = std::get<1>(tuple_);
-    // std::vector<std::string> labels_below = std::get<2>(tuple_);
-    // std::vector<std::string> labels_above = std::get<3>(tuple_);
-    // for(auto a:labels_above){
-    //     std::cout<<a<<" ";
-    // }
-    // std::cout<<"\n";
-    // std::cout<<"data below size: "<<labels_below.size()<<'\n';
-    // std::cout<<"data above size: "<<labels_above.size()<<'\n';
-
-    // // for(auto i=0;i<labels_below.size();i++){
-    // //     std::cout<<labels_below.at(i)<<" "<<labels_above.at(i)<<std::endl;
-    // // }
-    // std::string classification = classify_data(labels_below);
-    // std::cout<<classification<<std::endl;
-    // // float b = calculate_overall_entropy(data_below.at(3),data_above.at(3),labels_below,labels_above);
-    // float b = calculate_entropy(data_below.at(3),labels_below);
-    // std::cout<<b<<'\n';
-    // std::cout<<"_____________________________________________"<<std::endl;
-    // std::cout<<"SECOND split of 0th column by splitting value 6.7"<<std::endl;
-    // split_value = 6.7;
-    // tuple_ = split_data(data_above,labels_above,split_value,0);
-    // data_below = std::get<0>(tuple_);
-    // data_above = std::get<1>(tuple_);
-    // labels_below = std::get<2>(tuple_);
-    // labels_above = std::get<3>(tuple_);
-    // std::cout<<"data below size: "<<data_below.at(0).size()<<'\n';
-    // std::cout<<"data above size: "<<data_above.at(0).size()<<'\n';
-    // b = calculate_entropy(data_above.at(0),labels_above);
-    // std::cout<<b<<'\n';
-    // std::cout<<data_above.at(1).size();
-    // // for(auto i=0;i<data_above.at(1).size();i++){
-    // //     std::cout<<data_above.at(2).at(i)<<" "<<data_above.at(3).at(i)<<" "<<labels_below.at(i)<<std::endl;
-    // // }
-    // std::cout<<std::endl;
-    // std::map<int,std::vector<float>> potential_splits = get_potential_splits(iris->get_data(),iris->get_species());
     decision_tree_algorithm(iris->get_data(),iris->get_species(),0);
 
-    printf("HELLO.\n");
 }
 
 
