@@ -88,8 +88,10 @@ ReadCsvBikes::ReadCsvBikes(int number_of_rows,int number_of_columns,const std::s
             tmp.push_back(std::stof(el4));
             tmp.push_back(std::stof(el5));
             tmp.push_back(std::stof(el6));
-            tmp.push_back(std::stof(el_target));
             X.push_back(tmp);
+            tmp.push_back(std::stof(el_target));
+            X_Y.push_back(tmp);
+            Y.push_back(std::stof(el_target));
         }
     }
 
@@ -97,6 +99,10 @@ ReadCsvBikes::ReadCsvBikes(int number_of_rows,int number_of_columns,const std::s
 
     file.close();
 }
+
+std::vector<float> ReadCsvBikes::get_row_by_index(int index_of_row){
+    return this->X[index_of_row];
+};
 
 // std::vector<std::vector<float>> ReadCsvBikes::sort_by_column(int index){
 //     std::vector<std::vector<float>> X_copy = this->X;

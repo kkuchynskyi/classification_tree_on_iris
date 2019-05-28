@@ -10,8 +10,11 @@
 class Dataset{
  public:
   virtual std::vector<std::vector<float>>& get_X() = 0;
+  virtual std::vector<std::vector<float>>& get_X_Y() = 0;
+  virtual std::vector<float>& get_Y() = 0;
   virtual int get_number_rows() = 0;
   virtual int get_number_columns() = 0;
+  virtual std::vector<float> get_row_by_index(int) = 0;
 };
 
 
@@ -48,11 +51,20 @@ class ReadCsvBikes : public Dataset {
   ReadCsvBikes(int,int,const std::string);
   std::vector<std::vector<float>>& get_X() override {
         return X; }
+  std::vector<std::vector<float>>& get_X_Y () override  {
+        return X_Y; }
+  std::vector<float>& get_Y() override{
+        return Y; }
   int get_number_rows() override{ return number_rows;};
   int get_number_columns() override{ return number_columns;};
+  std::vector<float> get_row_by_index(int) override;
   std::vector<std::vector<float>> sort_by_column(int);
+
 private:
+  std::vector<std::vector<float>> X_Y;
   std::vector<std::vector<float>> X;
+  std::vector<float> Y;
+
   int number_rows;
   int number_columns;
 };

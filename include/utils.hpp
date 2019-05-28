@@ -12,16 +12,60 @@ float vector_mean(const std::vector<float>& column){
 
     return std::accumulate(column.begin(),column.end(),0.0)/column.size();
 }
-float mse(const std::vector<float>& column){
-    float sum = 0;
-    float column_mean = vector_mean(column);
-    std::cout<<"mean : "<<column_mean<<std::endl;
-    for(auto i:column){
-        sum += std::pow(i-column_mean,2);
+//++++
+float vector_mean_last_columns(const std::vector<std::vector<float>>& data){
+    if(data.size()==0){
+        std::cout<<"Error in 'vector_mean_last_columns'.Data provided to this function is empty()."<<std::endl;
+        //return;
     }
-    return sum/column.size();
+    else{
+        int index_of_last_column = data[0].size()-1;
+        float sum = 0;
+        for(int i=0;i<data.size();i++){
+            sum+=data[i][index_of_last_column];
+        }
+        return sum/data.size();
+    }
+    
 }
 
+float mse(const std::vector<std::vector<float>>& data){
+    if(data.size()==0){
+        std::cout<<"Error in 'squared_error'.Data provided to this function is empty()."<<std::endl;
+        //return;
+    }
+    else{
+        int index_of_last_column = data[0].size() -1;
+        float sum = 0;
+        float mean_value = vector_mean_last_columns(data);
+        for(int i =0;i<data.size();i++){
+            sum+=std::pow(data[i][index_of_last_column] - mean_value,2);
+        }
+        return sum/data.size();
+
+    }
+}
+
+
+
+// float mse(const std::vector<float>& column){
+//     float sum = 0;
+//     float column_mean = vector_mean(column);
+//     std::cout<<"mean : "<<column_mean<<std::endl;
+//     for(auto i:column){
+//         sum += std::pow(i-column_mean,2);
+//     }
+//     return sum/column.size();
+// }
+
+void stack_X_and_Y(vec2d<float>& a,std::vector<float> b){
+    if(a.size()==b.size()){
+        for(int i=0;i<a.size();i++){
+            a[i].push_back(b[i]);
+        }
+
+    }
+}
 
 float mean_by_column(std::vector<std::vector<float>> const  &column,int index_column){
     float sum = 0;
@@ -69,5 +113,17 @@ std::vector<std::vector<float>> sort_by_feature(std::vector<std::vector<float>>&
     return X_to_sort;
 }
 
+float error(std::vector<float> a,std::vector<float> b){
+    if(a.size()==b.size()){
+        float s = 0;
+        for(int i=0;i<a.size();i++){
+            s+=std::pow(a[i] -b[i],2);
+        }
+        return s;
+    }
+    else{
+        std::cout<<"ERROR IN error"<<std::endl;
+    }
+}
 
 #endif

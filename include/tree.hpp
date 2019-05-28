@@ -10,7 +10,7 @@ using vec2d = std::vector<std::vector<T>>;
 
 
 struct Node{
-  bool isLeaf;
+  bool isLeaf = {0};
   float splitValue;
   int splitColumn;
   std::unique_ptr<Node> left;   // Pointer to the left subtree.
@@ -24,14 +24,14 @@ struct NodeClassification : Node{
 };
 
 struct NodeRegression : Node{
-  float value;         // The data in this node.
-  std::unique_ptr<NodeRegression> left;   // Pointer to the left subtree.
-  std::unique_ptr<NodeRegression> right;
+  float value;       // The data in this node.
+  std::shared_ptr<NodeRegression> left;   // Pointer to the left subtree.
+  std::shared_ptr<NodeRegression> right;
 };
 
 class BaseDecisionTree{
  public:
-  virtual void fit(Dataset&) = 0;
+  virtual void fit(vec2d<float>,std::vector<float>) = 0;
   //virtual vector<float> predict(vec2d<float>);
   //virtual void print_tree() = 0;
 
@@ -71,25 +71,36 @@ class DecisionTreeClassifier{
 class DecisionTreeRegressor : public BaseDecisionTree{
   public:
    DecisionTreeRegressor(int i,int j): max_depth(i),min_sample_split(j){};
-   void fit(Dataset&) override;
-   //void print_tree() override;
+   void fit(vec2d<float> ,std::vector<float>) override;
+   std::vector<float> predict(vec2d<float>);
+   void print_tree();
   private:
    bool check_cv(vec2d<float>,int);
-   
    std::map<int,std::vector<float>> get_potential_splits(vec2d<float>);
 
    float classify_data(std::vector<std::vector<float>>);
    
-   std::tuple<vec2d<float>,vec2d<float>> split_finding(vec2d<float>&,int&,float&);
+   auto split_finding(vec2d<float>&,int&,float&);
 
-   void _fit_one_stage(vec2d<float>&,std::unique_ptr<NodeRegression>&,int);
+   void _fit_one_stage(vec2d<float>&,std::shared_ptr<NodeRegression>&,int);
+   float predict_one_step(std::vector<float>);
    
-   //void _print_one_node(std::unique_ptr<NodeRegression>&);
-   
-   std::unique_ptr<NodeRegression> root;
+   std::shared_ptr<NodeRegression> root;
    int _n_training_examples;
    int _n_features;
    int max_depth;
    int min_sample_split;
 };
+
+class GradientDecisionTreeRegressor{
+ public:
+  GradientDecisionTreeRegressor(int i ):_n_estimators(i){};
+  void fit(vec2d<float>,std::vector<float>,int,int);
+ private:
+  std::vector<DecisionTreeRegressor> estimators;
+  int _n_estimators;
+  int _n_training_examples;
+  int _n_features;
+};
+
 #endif
