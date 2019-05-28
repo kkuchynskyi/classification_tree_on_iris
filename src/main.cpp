@@ -17,11 +17,8 @@ int main()
     DecisionTreeRegressor b(3,1);
     auto X = bikes->get_X();
     auto Y = bikes->get_Y();
-    b.fit(X,Y);
-    //auto tmp = b.predict(X);
-    b.print_tree();
-    GradientDecisionTreeRegressor t(2);
-    t.fit(X,Y,bikes->get_number_rows(),bikes->get_number_columns());;
+    GradientDecisionTreeRegressor t(25);
+    t.fit(X,Y);
     clock_t end = clock();
     float elapsed_time = float(end -begin)/CLOCKS_PER_SEC;
     std::cout<<endl<<"ELAPSED TIME: "<<elapsed_time<<std::endl;
